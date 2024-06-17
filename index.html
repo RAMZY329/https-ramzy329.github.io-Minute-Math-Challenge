@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Integer Operations Game</title>
+    <style>
+      @keyframes backgroundAnimation {
+        0% {
+          background-color: #ffefd5;
+        }
+        50% {
+          background-color: #fffacd;
+        }
+        100% {
+          background-color: #ffefd5;
+        }
+      }
+
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: linear-gradient(45deg, #ffefd5, #fffacd, #ffebcd);
+        background-size: 400% 400%;
+        animation: backgroundAnimation 10s ease infinite;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .container {
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border: 5px solid #ff69b4;
+        max-width: 500px;
+        width: 100%;
+      }
+
+      h1 {
+        color: #ff4500;
+        font-size: 2em;
+        margin: 0;
+        margin-bottom: 20px;
+      }
+
+      #game {
+        margin-top: 10px;
+      }
+
+      #question {
+        font-size: 1.5em;
+        color: #ff1493;
+        margin-bottom: 10px;
+      }
+
+      #answer {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 10px;
+        border: 2px solid #ff69b4;
+        outline: none;
+        width: calc(100% - 24px);
+        box-sizing: border-box;
+      }
+
+      #submitAnswer,
+      #tryAgain {
+        padding: 10px 20px;
+        font-size: 1em;
+        margin: 10px 5px 0 5px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: calc(50% - 30px);
+        box-sizing: border-box;
+      }
+
+      #submitAnswer {
+        background-color: #32cd32;
+        color: white;
+      }
+
+      #tryAgain {
+        background-color: #ff4500;
+        color: white;
+        display: none;
+      }
+
+      #submitAnswer:hover {
+        background-color: #2e8b57;
+      }
+
+      #tryAgain:hover {
+        background-color: #d2691e;
+      }
+
+      #feedback {
+        margin-top: 10px;
+        font-size: 1.2em;
+      }
+
+      #score,
+      #timer {
+        margin-top: 10px;
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+
+      #score {
+        color: #008080;
+      }
+
+      #timer {
+        color: #8b0000;
+      }
+
+      @media (max-width: 400px) {
+        h1 {
+          font-size: 1.5em;
+        }
+
+        #question {
+          font-size: 1.2em;
+        }
+
+        #answer,
+        #submitAnswer,
+        #tryAgain {
+          font-size: 0.8em;
+        }
+
+        #feedback,
+        #score,
+        #timer {
+          font-size: 1em;
+        }
+
+        #submitAnswer,
+        #tryAgain {
+          width: calc(100% - 20px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Minute Math Challenge: Integer Operations Edition</h1>
+      <h6>by Automated Forms For Teachers</h6>
+      <div id="game">
+        <div id="question"></div>
+        <input type="number" id="answer" placeholder="Enter your answer" />
+        <button id="submitAnswer">Submit</button>
+        <div id="feedback"></div>
+        <div id="score">Score: 0</div>
+        <div id="timer">Time: 60s</div>
+        <button id="tryAgain">Try Again</button>
+      </div>
+    </div>
+
+    <!-- Background Music -->
+    <audio id="backgroundMusic" loop>
+      <source src="background_music.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <script>
+      let score = 0;
+      let timeLeft = 60;
+      let timerId;
+      let backgroundMusic = document.getElementById("backgroundMusic");
+
+      function startTimer() {
+        timeLeft = 60;
+        document.getElementById("timer").textContent = `Time: ${timeLeft}s`;
+        timerId = setInterval(() => {
+          timeLeft--;
+          document.getElementById("timer").textContent = `Time: ${timeLeft}s`;
+          if (timeLeft <= 0) {
+            endGame();
+          }
+        }, 1000);
+      }
+
+      function generateQuestion() {
+        const operators = ["+", "-", "*", "/"];
+        const num1 = Math.floor(Math.random() * 20) - 10; // Random integer between -10 and 10
+        const num2 = Math.floor(Math.random() * 20) - 10;
+        const operator =
+          operators[Math.floor(Math.random() * operators.length)];
+
+        let question, answer;
+        switch (operator) {
+          case "+":
+            question = `${num1} + ${num2}`;
+            answer = num1 + num2;
+            break;
+          case "-":
+            question = `${num1} - ${num2}`;
+            answer = num1 - num2;
+            break;
+          case "*":
+            question = `${num1} * ${num2}`;
+            answer = num1 * num2;
+            break;
+          case "/":
+            if (num2 === 0 || num1 % num2 !== 0) {
+              return generateQuestion(); // Retry if division is not clean
+            }
+            question = `${num1} / ${num2}`;
+            answer = num1 / num2;
+            break;
+        }
+        return { question, answer };
+      }
+
+      function displayQuestion() {
+        const { question, answer } = generateQuestion();
+        document.getElementById("question").textContent = question;
+        document.getElementById("question").dataset.answer = answer;
+        document.getElementById("answer").value = "";
+        document.getElementById("feedback").textContent = "";
+      }
+
+      function validateAnswer() {
+        const userAnswer = parseInt(
+          document.getElementById("answer").value,
+          10
+        );
+        const correctAnswer = parseInt(
+          document.getElementById("question").dataset.answer,
+          10
+        );
+        return userAnswer === correctAnswer;
+      }
+
+      function endGame() {
+        clearInterval(timerId);
+        backgroundMusic.pause(); // Pause background music on game end
+        document.getElementById("answer").disabled = true;
+        document.getElementById("submitAnswer").disabled = true;
+        document.getElementById("tryAgain").style.display = "inline-block";
+      }
+
+      function resetGame() {
+        score = 0;
+        document.getElementById("score").textContent = `Score: ${score}`;
+        document.getElementById("answer").disabled = false;
+        document.getElementById("submitAnswer").disabled = false;
+        document.getElementById("tryAgain").style.display = "none";
+        displayQuestion();
+        startTimer();
+        backgroundMusic.play(); // Start or resume background music on game reset
+      }
+
+      document.getElementById("submitAnswer").addEventListener("click", () => {
+        if (validateAnswer()) {
+          document.getElementById("feedback").textContent = "Correct!";
+          score += 1;
+          document.getElementById("score").textContent = `Score: ${score}`;
+          displayQuestion();
+        } else {
+          const correctAnswer =
+            document.getElementById("question").dataset.answer;
+          document.getElementById(
+            "feedback"
+          ).textContent = `Incorrect. The correct answer was ${correctAnswer}. Game Over!`;
+          endGame();
+        }
+      });
+
+      document.getElementById("tryAgain").addEventListener("click", resetGame);
+
+      displayQuestion();
+      startTimer();
+      backgroundMusic.play(); // Start playing background music when the game starts
+    </script>
+  </body>
+</html>
